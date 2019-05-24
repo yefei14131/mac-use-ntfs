@@ -1,0 +1,16 @@
+ntfs_disk=`mount |grep disk |grep -v disk1 |grep '(ntfs'| grep 'read-only'` 
+if [[ -n "$ntfs_disk" ]];
+then
+	echo "发现ntfs磁盘挂载: $ntfs_disk"
+	disk_item=`mount |grep disk |grep -v disk1 |grep '(ntfs' |awk '{print $1}'`
+	disk_mnt=`mount |grep disk |grep -v disk1 |grep '(ntfs' |awk '{print $3}'`
+	echo "$disk_item"
+	echo "$disk_mnt"
+	umount $disk_item
+	mkdir "$disk_mnt"
+	mount_ntfs -o rw,nobrowse $disk_item "$disk_mnt"
+	echo "磁盘挂载成功: `mount |grep disk |grep -v disk1 |grep $disk_item`"
+fi
+
+
+

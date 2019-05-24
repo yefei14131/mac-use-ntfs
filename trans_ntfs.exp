@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+set basepath [lindex $argv 0]
+set password [lindex $argv 1]
+set timeout -1
+
+spawn sudo $basepath/trans_ntfs
+match_max 100000
+expect {
+    "*assword*"
+    {
+        send -- "$password\n"
+    }
+    #""
+    #{
+    #    send -- "echo 'exit' \n exit\n"
+    #}
+}
+interact
