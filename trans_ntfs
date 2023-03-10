@@ -1,19 +1,25 @@
-ntfs_disk=`mount |grep disk |grep -v disk1 |grep '(ntfs'| grep 'read-only'` 
+ntfs_disk=`mount |grep disk |grep -v disk1 |grep 'ntfs'| grep 'read-only'` 
 if [[ -n "$ntfs_disk" ]];
 then
 	echo "发现ntfs磁盘挂载: \n$ntfs_disk"
-	len=`mount |grep disk |grep -v disk1 |grep '(ntfs'| grep 'read-only'| wc -l`
+	len=`mount |grep disk |grep -v disk1 |grep 'ntfs'| grep 'read-only'| wc -l`
 	for ((i=0;i<$len;i++));
 	do
-		disk_item=`mount |grep disk |grep -v disk1 |grep '(ntfs'| grep 'read-only'| head -1| awk '{print $1}'`
-		disk_mnt=`mount |grep disk |grep -v disk1 |grep '(ntfs'| grep 'read-only' | head -1| awk '{print $3}'`
+		disk_item=`mount |grep disk |grep -v disk1 |grep 'ntfs'| grep 'read-only'| head -1| awk '{print $1}' `
+	#	test $(echo ${disk_item} |grep -e "^ntfs" |wc -l) = 1 && disk_item=$(echo ${disk_item} |sed -r 's#ntfs:\/\/([^\/]*).*#\/dev\/\1#g')
+		if [[ $(echo ${disk_item} |grep -e "^ntfs" |wc -l) -eq 1 ]];
+		then
+			disk_item_new=$(echo ${disk_item} |sed -r 's#ntfs:\/\/([^\/]*).*#\/dev\/\1#g')
+		else
+			disk_item_new=${disk_item}
+		fi 
+		echo '需要新挂在的磁盘卷为: '${disk_item_new}
+		disk_mnt=`mount |grep disk |grep -v disk1 |grep 'ntfs'| grep 'read-only' | head -1| awk '{print $3}'`
 		umount $disk_item
 		mkdir "$disk_mnt"
-		mount_ntfs -o rw,nobrowse $disk_item "$disk_mnt"
+		mount_ntfs -o rw,nobrowse $disk_item_new "$disk_mnt"
 		echo "磁盘挂载成功: `mount |grep disk |grep -v disk1 |grep $disk_item`"
 
 	done
 fi
-
-
 
